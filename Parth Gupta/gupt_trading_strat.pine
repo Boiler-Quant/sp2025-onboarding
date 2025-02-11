@@ -1,0 +1,32 @@
+//@version=2
+strategy("Quant Trading Strategy", overlay=true)
+//variable initialization
+ema20 = ema(close, 20) //exponential 20-day moving average
+ema50 = ema(close, 50) //exponential 50-day moving average
+sma50 = sma(close, 50) //simple 50-day moving average
+rsiValue = rsi(close, 14) //relative strength index
+
+// long = ema20 > ema50 and rsiValue < 30
+// short = ema20 < ema50 and rsiValue > 70
+
+long = rsiValue > 50 and close > sma50 //long condition
+short = rsiValue < 50 and close < sma50 //short condition
+
+//overlays indicators on chart
+plot(ema20, title="20", color=#0e0f0e, linewidth = 3)
+plot(ema50, title="50", color=#FFC1CC, linewidth = 3)
+plot(sma50, title="sma50", color=#66FF00, linewidth = 3)
+plot(rsiValue, title="rsi", color=#06FF33, linewidth = 3)
+
+//sets the time frame
+start = timestamp(2021, 1, 1, 0, 0)
+end = timestamp(2024, 1, 1, 0, 0)
+
+//places trades based on factors
+if time >= start and time <= end
+    strategy.entry("Long", strategy.long, 1000.0, when = long)
+    strategy.entry("Short", strategy.short, 1000.0, when = short)
+
+//closes trades when conditions aren't met
+strategy.close("Long", when = short)
+strategy.close("Short", when = long)
